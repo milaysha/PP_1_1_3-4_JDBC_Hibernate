@@ -10,7 +10,6 @@ import java.util.List;
 public class Main {
     public static void main(String[] args) {
         // реализуйте алгоритм здесь
-
         UserServiceImpl userService = new UserServiceImpl();
         userService.createUsersTable();
         String name = "Name1";
