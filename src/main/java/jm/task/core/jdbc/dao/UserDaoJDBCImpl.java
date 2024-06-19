@@ -15,17 +15,15 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     public void createUsersTable() {
-
+        String sql = "CREATE TABLE users " +
+                "(id INT NOT NULL AUTO_INCREMENT, " +
+                "name VARCHAR(255), " +
+                "last_name VARCHAR(255), " +
+                "age INT NOT NULL, " +
+                "PRIMARY KEY (id))";
         try (Connection con = Util.getDbConnection();
-             Statement stmt = con.createStatement()) {
-            String sql = "CREATE TABLE users " +
-                    "(id INT NOT NULL AUTO_INCREMENT, " +
-                    "name VARCHAR(255), " +
-                    "last_name VARCHAR(255), " +
-                    "age INT NOT NULL, " +
-                    "PRIMARY KEY (id))";
-
-            stmt.executeUpdate(sql);
+             PreparedStatement pstmt = con.prepareStatement(sql)) {
+            pstmt.executeUpdate(sql);
             System.out.println("Table created successfully.");
         } catch (SQLException | IOException | ClassNotFoundException e) {
             throw new RuntimeException(e);
@@ -33,11 +31,10 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     public void dropUsersTable() {
+        String sql = "DROP TABLE IF EXISTS users";
         try (Connection con = Util.getDbConnection();
-             Statement stmt = con.createStatement()) {
-
-            String sql = "DROP TABLE IF EXISTS users";
-            stmt.executeUpdate(sql);
+             PreparedStatement pstmt = con.prepareStatement(sql)) {
+           pstmt.executeUpdate(sql);
             System.out.println("Table created successfully.");
         } catch (SQLException | IOException | ClassNotFoundException e) {
             throw new RuntimeException(e);
@@ -47,12 +44,11 @@ public class UserDaoJDBCImpl implements UserDao {
     public void saveUser(String name, String lastName, byte age) {
         String insertSql = "INSERT INTO users (name, last_name, age) VALUES (?, ?, ?)";
         try (Connection con = Util.getDbConnection();
-             PreparedStatement stmt = con.prepareStatement(insertSql)) {
-
-            stmt.setString(1, name);
-            stmt.setString(2, lastName);
-            stmt.setInt(3, age);
-            int rowsAffected = stmt.executeUpdate();
+             PreparedStatement pstmt = con.prepareStatement(insertSql);) {
+            pstmt.setString(1, name);
+            pstmt.setString(2, lastName);
+            pstmt.setInt(3, age);
+            int rowsAffected = pstmt.executeUpdate();
             if (rowsAffected > 0) {
                 System.out.println("Пользователь успешно сохранен в базе данных.");
             } else {
@@ -66,11 +62,11 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     public void removeUserById(long id) {
-        try (Connection con = Util.getDbConnection();
-             Statement stmt1 = con.createStatement()) {
-            String deleteQuery = "DELETE FROM users;";
-            stmt1.executeUpdate(deleteQuery);
-            System.out.println("Все записи успешно удалены из таблицы 'users'");
+        String deleteQuery = "DELETE FROM users WHERE id = \" + id + \";";
+        try ( Connection con = Util.getDbConnection();
+              PreparedStatement pstmt = con.prepareStatement(deleteQuery)) {
+            pstmt.executeUpdate(deleteQuery);
+            System.out.println("\"Пользователь с ID \" + id + \" успешно удален из таблицы 'users'\"");
         } catch (SQLException e) {
             System.out.println("Ошибка при работе с PostgreSQL: " + e.getMessage());
         } catch (IOException | ClassNotFoundException e) {
@@ -80,19 +76,12 @@ public class UserDaoJDBCImpl implements UserDao {
 
 
     public List<User> getAllUsers() {
-        try (
-                Connection con = Util.getDbConnection();
-                Statement stmt2 = con.createStatement()) {
-
-            // SQL запрос для выбора всех пользователей из таблицы "users"
-            String selectQuery = "SELECT name, last_name, age  FROM users;";
-
-            // Выполнение SQL запроса
-            ResultSet resultSet = stmt2.executeQuery(selectQuery);
+        String selectQuery = "SELECT name, last_name, age  FROM users;";
+        try (Connection con = Util.getDbConnection();
+             PreparedStatement pstmt = con.prepareStatement(selectQuery)) {
+            ResultSet resultSet = pstmt.executeQuery(selectQuery);
             List<User> us = new ArrayList<>();
-            // Обработка результатов запроса
             while (resultSet.next()) {
-
                 String userName = resultSet.getString("name");
                 String userLastName = resultSet.getString("last_name");
                 byte age = resultSet.getByte("age");
@@ -110,17 +99,15 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     public void cleanUsersTable() {
+        String tableName = "users";
+        String sql = "TRUNCATE TABLE users";
         try (Connection con = Util.getDbConnection();
-             Statement stmt3 = con.createStatement()) {
-            // SQL запросы для очистки данных из таблиц
-            String tableName = "users";
-            String sql = "TRUNCATE TABLE users";
-
-            stmt3.executeUpdate(sql);
+             PreparedStatement pstmt = con.prepareStatement(sql)) {
+            pstmt.executeUpdate(sql);
             System.out.println("Таблица " + tableName + " успешно очищена.");
-
         } catch (SQLException | IOException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
-    }}
+    }
+}
 

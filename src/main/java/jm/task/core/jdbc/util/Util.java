@@ -12,14 +12,16 @@ import java.sql.SQLException;
 
 public class Util {
     // реализуйте настройку соеденения с БД
+    private static Connection dbConnection;
     public static Connection getDbConnection() throws ClassNotFoundException, SQLException, IOException {
-
-        String dbHost = "localhost";
-        String dbPort = "3306";
-        String dbName = "mydbtest";
-        String connectionString = "jdbc:mysql://" + dbHost + ":" + dbPort + "/" + dbName;
-        Connection conn = DriverManager.getConnection(connectionString, "root", "Zalupa_negra228");
-        return conn;
+        if (dbConnection == null || dbConnection.isClosed()) {
+            String dbHost = "localhost";
+            String dbPort = "3306";
+            String dbName = "mydbtest";
+            String connectionString = "jdbc:mysql://" + dbHost + ":" + dbPort + "/" + dbName;
+            dbConnection = DriverManager.getConnection(connectionString, "root", "Zalupa_negra228");
+        }
+        return dbConnection;
     }
     public static Session getDbSession() {
         SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
